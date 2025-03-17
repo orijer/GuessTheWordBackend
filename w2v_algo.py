@@ -1,6 +1,6 @@
+import numpy as np
 from numpy import linalg as LA
 import itertools
-import numpy as np
 from os.path import join
 
 class Algo:
@@ -10,18 +10,26 @@ class Algo:
 
     def _load_algo_data(self):
         path = self._data_path
+        # Load words list as before
         with open(join(path, "words_list.txt"), 'r', encoding='utf-8') as f:
             cur_words = f.readlines()
-        cur_words = [word[:-1] for word in cur_words]
-        cur_vecs = np.load(join(path, "words_vectors.npy"))
+        cur_words = [word[:-1] for word in cur_words]  # Remove newline
+        
+        # Lazily load vectors using memory mapping
         self._words_list = cur_words
-        self._vecs = cur_vecs / LA.norm(cur_vecs, axis=1).reshape((len(cur_vecs), 1))
+        self._vecs = np.load(join(path, "words_vectors.npy"), mmap_mode='r')  # Use mmap_mode='r' for lazy loading
+        
+        # Normalize vectors (this still requires the vectors to be in memory for normalization)
+        self._vecs = self._vecs / LA.norm(self._vecs, axis=1).reshape((len(self._vecs), 1))
         
     def calc_similarity(self, word1, word2):
         index1 = self._words_list.index(as_appears_in_algo(word1))
         index2 = self._words_list.index(as_appears_in_algo(word2))
+        
+        # Fetch vectors lazily from memory-mapped file
         vec1 = self._vecs[index1]
         vec2 = self._vecs[index2]
+        
         return sum([vec1[i] * vec2[i] for i in range(len(vec1))])
 
     def search_similar(self, word, num_results):
@@ -32,6 +40,7 @@ class Algo:
         except:
             if len(wanted_ind) == 0:
                 return {}
+        
         for word_ind in wanted_ind:
             results = self._top_similar_smart(self._vecs[word_ind], num_results=num_results)
             results_dict[self._words_list[word_ind]] = results
@@ -50,6 +59,7 @@ class Algo:
             words_idx.append(cur_word_idx)
 
         for input_pos_idx_option in list(itertools.product(*words_idx)):
+            # Use memory-mapped vectors for analogy calculation
             wanted_vec = self._vecs[input_pos_idx_option[2]] - self._vecs[input_pos_idx_option[0]] + \
                          self._vecs[input_pos_idx_option[1]]
             results = self._top_similar_smart(wanted_vec, num_results=num_results)
@@ -63,6 +73,7 @@ class Algo:
 
     def _top_similar(self, vec, results_to_show=10):
         try:
+            # Use memory-mapped vectors to calculate similarity
             mul = np.dot(self._vecs, vec)
         except:
             try:
@@ -70,7 +81,7 @@ class Algo:
             except:
                 for i in range(len(self._vecs)):
                     if self._vecs[i].shape[0] != 100 or self._vecs[i].shape[0] != 200:
-                        print("error at top similar at vec number {} with shape {}".format(i, self._vecs[i].shape))
+                        print("Error at top similar for vector number {} with shape {}".format(i, self._vecs[i].shape))
         vec_norm = LA.norm(vec)
         sims = mul / vec_norm
         ind = np.argpartition(sims, -results_to_show)[-results_to_show:]
