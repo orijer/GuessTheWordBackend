@@ -38,8 +38,8 @@ def get_hint(word):
     ]
     
     closest_words = model.get_most_similar(word)[5:]
-    for i in enumerate(len(closest_words)):
-        hints.append(f"המילה '{closest_words[i]}' קרובה למילה הסודית")
+    for close_word in closest_words:
+        hints.append(f"המילה '{close_word}' קרובה למילה הסודית")
     
     return random.choice(hints)
 
