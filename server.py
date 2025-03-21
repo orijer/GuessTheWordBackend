@@ -14,7 +14,7 @@ if not os.path.exists("./wiki-w2v/words_vectors.npy"):
     gdown.download(f"https://drive.google.com/uc?id={fileID}", outputFile, quiet=False)
 
 app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000", "https://orijer.github.io/GuessTheWordFrontend/"], 
+app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000", "https://orijer.github.io"], 
                    allow_credentials=True, allow_methods=["GET"], allow_headers=["*"])
 model = HebrewSimilarWords()
 
