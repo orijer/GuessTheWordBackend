@@ -1,5 +1,6 @@
 # Guess The Word Backend
-This repository holds the backend code for my Guess the word game. It uses REST API structure.
+This repository holds the backend code for my Guess the word game. It uses REST API structure. The frontend repository can be found [here](https://github.com/orijer/GuessTheWordFrontend)
+
 In the game there is a secret word that the player needs to find by asking how similar the guess and hidden words are to each other.
 
 # Code
