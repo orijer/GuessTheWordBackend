@@ -30,7 +30,7 @@ class Algo:
         vec1 = self._vecs[index1]
         vec2 = self._vecs[index2]
         
-        return sum([vec1[i] * vec2[i] for i in range(len(vec1))])
+        return round(sum([vec1[i] * vec2[i] for i in range(len(vec1))]) * 100, 2)
 
     def search_similar(self, word, num_results):
         results_dict = {}
